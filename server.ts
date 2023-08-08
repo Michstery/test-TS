@@ -4,6 +4,13 @@ import mongoose from "mongoose";
 
 const app: Express = express();
 dotenv.config();
+const routes = require("./routes");
+
+
+// parse application/x-www-form-urlencoded
+app.use(express.json( { limit: '10kb' } ));
+// ----------  app routes  ------------ //
+app.use("/test", routes);
 
 // --------- Mongoose Setup --------- //
 const defaultConfig = process.env.MONGO_URI as string;

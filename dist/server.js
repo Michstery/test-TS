@@ -8,6 +8,11 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const app = (0, express_1.default)();
 dotenv_1.default.config();
+const routes = require("./routes");
+// parse application/x-www-form-urlencoded
+app.use(express_1.default.json({ limit: '10kb' }));
+// ----------  app routes  ------------ //
+app.use("/test", routes);
 // --------- Mongoose Setup --------- //
 const defaultConfig = process.env.MONGO_URI;
 const port = process.env.PORT;

@@ -8,31 +8,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const { v4: uuidv4 } = require('uuid');
+const bcrypt = require("bcrypt");
+const { v4: uuidv4 } = require("uuid");
 const User = require("../models/users");
 module.exports = {
     registerUser(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email, password, userName } = req.body;
-                const hashedPassword = yield bcrypt_1.default.hash(password, 12);
+                const hashedPassword = yield bcrypt.hash(password, 12);
                 const dataToSave = {
                     email,
                     password: hashedPassword,
                     userName,
                     role: req.body.role,
-                    userId: uuidv4()
+                    userId: uuidv4(),
                 };
                 const savedData = yield User.create(dataToSave);
                 res.status(200).json({
                     data: savedData,
-                    status: 'true',
-                    message: "success"
+                    status: "true",
+                    message: "success",
                 });
             }
             catch (error) {
