@@ -10,4 +10,7 @@ const userController = require("../controllers/users");
 router.post("/register", asyncHandler((req, res) => {
     return userController.registerUser(req, res);
 }));
+router.post("/login", asyncHandler((req, res) => {
+    return userController.loginUser(req, res);
+}));
 module.exports = router;

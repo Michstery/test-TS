@@ -1,6 +1,8 @@
 import mongoose, { Document, Schema } from "mongoose";
 import validator from "validator";
 import mongoosePaginate from "mongoose-paginate";
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const schema: Schema = new Schema(
   {
@@ -35,6 +37,25 @@ const schema: Schema = new Schema(
     timestamps: true,
   }
 );
+
+schema.methods.createJWT = function () {
+	return jwt.sign(
+		{
+			userId: this.userId,
+			userName: this.userName,
+			email: this.email,
+		},
+		process.env.JWT_SECRET,
+		{
+			expiresIn: "30d",
+		}
+	);
+};
+
+schema.methods.comparePassword = async function (canditatePassword:string) {
+	const isMatch = await bcrypt.compare(canditatePassword, this.password);
+	return isMatch;
+};
 
 schema.plugin(mongoosePaginate);
 

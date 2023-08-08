@@ -10,4 +10,11 @@ router.post(
   })
 );
 
+router.post(
+    "/login",
+    asyncHandler((req: Request, res: Response) => {
+      return userController.loginUser(req, res);
+    })
+  );
+
 module.exports = router;

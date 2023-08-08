@@ -16,7 +16,8 @@ module.exports = {
     registerUser(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { email, password, userName } = req.body;
+                let { email, password, userName } = req.body;
+                email = email.toLowerCase();
                 const hashedPassword = yield bcrypt.hash(password, 12);
                 const dataToSave = {
                     email,
@@ -30,6 +31,48 @@ module.exports = {
                     data: savedData,
                     status: "true",
                     message: "success",
+                });
+            }
+            catch (error) {
+                res.status(500).json({
+                    status: false,
+                    message: `${error}`,
+                });
+            }
+        });
+    },
+    loginUser(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let { email, password } = req.body;
+                email = email.toLowerCase();
+                if (!password || !email) {
+                    res.status(400).json({
+                        status: false,
+                        message: 'please provide both password and email fields',
+                    });
+                }
+                const user = yield User.findOne({
+                    email,
+                });
+                if (!user) {
+                    res.status(404).json({
+                        status: false,
+                        message: 'Email does not Exist',
+                    });
+                }
+                let AwaitedUser = yield user.comparePassword(password);
+                if (user && !AwaitedUser) {
+                    res.status(404).json({
+                        status: false,
+                        message: "Invalid password",
+                    });
+                }
+                const token = user.createJWT();
+                return res.status(201).json({
+                    status: "success",
+                    user: user,
+                    token,
                 });
             }
             catch (error) {
