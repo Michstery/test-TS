@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 const User = require("../models/users");
+const { promisify } = require("util");
+const jwt = require("jsonwebtoken");
 module.exports = {
     registerUser(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -49,7 +51,7 @@ module.exports = {
                 if (!password || !email) {
                     res.status(400).json({
                         status: false,
-                        message: 'please provide both password and email fields',
+                        message: "please provide both password and email fields",
                     });
                 }
                 const user = yield User.findOne({
@@ -58,7 +60,7 @@ module.exports = {
                 if (!user) {
                     res.status(404).json({
                         status: false,
-                        message: 'Email does not Exist',
+                        message: "Email does not Exist",
                     });
                 }
                 let AwaitedUser = yield user.comparePassword(password);
@@ -81,6 +83,27 @@ module.exports = {
                     message: `${error}`,
                 });
             }
+        });
+    },
+    logoutUser(req, res, next) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
+            const user = yield User.findOne({ email: req.user.email });
+            req.user = user;
+            req.token = token;
+            if (!req.user || !token) {
+                res.status(404).json({
+                    status: false,
+                    message: "You are not logged in",
+                });
+            }
+            delete req.token;
+            delete req.user;
+            return res.status(201).json({
+                status: "success",
+                message: "You have logged out successfully",
+            });
         });
     },
 };

@@ -7,10 +7,14 @@ const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 const asyncHandler = require("express-async-handler");
 const userController = require("../controllers/users");
+const { protect } = require("../middleware");
 router.post("/register", asyncHandler((req, res) => {
     return userController.registerUser(req, res);
 }));
 router.post("/login", asyncHandler((req, res) => {
     return userController.loginUser(req, res);
+}));
+router.post("/logout", protect, asyncHandler((req, res) => {
+    return userController.logoutUser(req, res);
 }));
 module.exports = router;
