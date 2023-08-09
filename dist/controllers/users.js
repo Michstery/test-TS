@@ -29,11 +29,10 @@ module.exports = {
     registerUser(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let { email, password, userName } = req.body;
-                email = email.toLowerCase();
+                const { email, password, userName } = req.body;
                 const hashedPassword = yield bcrypt.hash(password, 12);
                 const dataToSave = {
-                    email,
+                    email: email.toLowerCase(),
                     password: hashedPassword,
                     userName,
                     role: req.body.role,
@@ -57,8 +56,7 @@ module.exports = {
     loginUser(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let { email, password } = req.body;
-                email = email.toLowerCase();
+                const { email, password } = req.body;
                 if (!password || !email) {
                     res.status(400).json({
                         status: false,
@@ -66,15 +64,15 @@ module.exports = {
                     });
                 }
                 const user = yield User.findOne({
-                    email,
+                    email: email.toLowerCase(),
                 });
                 if (!user) {
                     res.status(404).json({
                         status: false,
-                        message: "Email does not Exist",
+                        message: "Email does not exist",
                     });
                 }
-                let AwaitedUser = yield user.comparePassword(password);
+                const AwaitedUser = yield user.comparePassword(password);
                 if (user && !AwaitedUser) {
                     res.status(404).json({
                         status: false,
@@ -104,10 +102,10 @@ module.exports = {
             req.user = user;
             req.token = token;
             if (!req.user || !token) {
-                res.status(404).json({
+                return next(res.status(404).json({
                     status: false,
                     message: "You are not logged in",
-                });
+                }));
             }
             delete req.token;
             delete req.user;
@@ -130,7 +128,7 @@ module.exports = {
                     const _a = req.query, { dateFrom, dateTo } = _a, rest = __rest(_a, ["dateFrom", "dateTo"]);
                     const query = Object.assign({}, rest);
                     if (req.query.userId) {
-                        let user = yield User.findOne({
+                        const user = yield User.findOne({
                             userId: req.query.userId
                         });
                         if (!user) {
@@ -139,10 +137,9 @@ module.exports = {
                                 message: "We are currently unable to get this user details.",
                             });
                         }
-                        user = user.toJSON();
                         return res.status(201).json({
                             status: "success",
-                            user: user,
+                            user: user.toJSON(),
                         });
                     }
                     return res.status(201).json({
@@ -159,4 +156,37 @@ module.exports = {
             }
         });
     },
+    updateUser(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!req.user) {
+                return next(res.status(404).json({
+                    status: false,
+                    message: "You are not logged in",
+                }));
+            }
+            else {
+                try {
+                    const { userName } = req.body;
+                    const user = yield User.findOneAndUpdate({ userId: req.user.userId }, { $set: { userName: userName } }, { upsert: true, omitUndefined: true, new: true });
+                    if (!user) {
+                        return next(res.status(404).json({
+                            status: false,
+                            message: `user with the ${req.user.userId} does not exist`,
+                        }));
+                    }
+                    const data = { userName };
+                    return res.status(201).json({
+                        status: "success",
+                        data,
+                    });
+                }
+                catch (error) {
+                    res.status(500).json({
+                        status: false,
+                        message: `${error}`,
+                    });
+                }
+            }
+        });
+    }
 };

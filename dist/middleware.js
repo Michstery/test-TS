@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
 const User = require("./models/users");
-const protect = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const auth = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     //////////////////////// ~ PROTECT ROUTE ~  /////////////////////////////////////
     // 1) Getting token and check if it's there
     let Mytoken;
@@ -44,4 +44,4 @@ const protect = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
     console.log("token verification failed");
     next();
 });
-module.exports = { protect };
+module.exports = { auth };

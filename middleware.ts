@@ -3,7 +3,7 @@ const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
 const User = require("./models/users");
 
-const protect = async (req: any, res: Response, next: NextFunction) => {
+const auth = async (req: any, res: Response, next: NextFunction) => {
   //////////////////////// ~ PROTECT ROUTE ~  /////////////////////////////////////
   // 1) Getting token and check if it's there
     let Mytoken;
@@ -38,4 +38,4 @@ const protect = async (req: any, res: Response, next: NextFunction) => {
   next();
 };
 
-module.exports = { protect }
+module.exports = { auth }

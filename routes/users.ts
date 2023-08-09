@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
 const userController = require("../controllers/users");
-const { protect }  = require("../middleware");
+const { auth }  = require("../middleware");
 
 router.post(
   "/register",
@@ -20,7 +20,7 @@ router.post(
 
 router.post(
   "/logout",
-  protect,
+  auth,
   asyncHandler((req: Request, res: Response) => {
     return userController.logoutUser (req, res);
   })
@@ -28,10 +28,18 @@ router.post(
 
 router.get(
   "/user",
-    protect,
+    auth,
   asyncHandler((req: Request, res: Response) => {
     return userController.getUser (req, res);
   })
 );
+
+router.put(
+    "/user/details",
+      auth,
+    asyncHandler((req: Request, res: Response) => {
+      return userController.updateUser (req, res);
+    })
+  );
 
 module.exports = router;

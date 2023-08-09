@@ -19,11 +19,10 @@ interface Data extends Body {
 module.exports = {
   async registerUser(req: Request, res: Response, next: NextFunction) {
     try {
-      let { email, password, userName } = req.body as Body;
-      email = email.toLowerCase();
+      const { email, password, userName } = req.body as Body;
       const hashedPassword = await bcrypt.hash(password, 12);
       const dataToSave: Data = {
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
         userName,
         role: req.body.role,
@@ -45,8 +44,7 @@ module.exports = {
 
   async loginUser(req: Request, res: Response, next: NextFunction) {
     try {
-      let { email, password } = req.body as Body;
-      email = email.toLowerCase();
+      const { email, password } = req.body as Body;
       if (!password || !email) {
         res.status(400).json({
           status: false,
@@ -54,15 +52,15 @@ module.exports = {
         });
       }
       const user = await User.findOne({
-        email,
+        email: email.toLowerCase(),
       });
       if (!user) {
         res.status(404).json({
           status: false,
-          message: "Email does not Exist",
+          message: "Email does not exist",
         });
       }
-      let AwaitedUser = await user.comparePassword(password);
+      const AwaitedUser = await user.comparePassword(password);
       if (user && !AwaitedUser) {
         res.status(404).json({
           status: false,
@@ -90,10 +88,12 @@ module.exports = {
     req.user = user;
     req.token = token;
     if (!req.user || !token) {
-      res.status(404).json({
-        status: false,
-        message: "You are not logged in",
-      });
+        return next(   
+            res.status(404).json({
+                status: false,
+                message: "You are not logged in",
+            })
+        )
     }
     delete req.token;
     delete req.user;
@@ -103,7 +103,7 @@ module.exports = {
     });
   },
 
-async getUser(req: any, res: Response, next: NextFunction) { 
+  async getUser(req: any, res: Response, next: NextFunction) { 
     if (req.user.role != 'admin') {
         return res.status(400).json({
             status: "false",
@@ -116,7 +116,7 @@ async getUser(req: any, res: Response, next: NextFunction) {
                 ...rest,
             }
             if (req.query.userId) {
-                let user = await User.findOne({
+                const user = await User.findOne({
                     userId: req.query.userId
                 })
                 if (!user) {
@@ -125,10 +125,9 @@ async getUser(req: any, res: Response, next: NextFunction) {
                         message: "We are currently unable to get this user details.",
                     });
                 }
-                user = user.toJSON()
                 return res.status(201).json({
                     status: "success",
-                    user: user,
+                    user: user.toJSON(),
                 });
             }
             return res.status(201).json({
@@ -144,6 +143,40 @@ async getUser(req: any, res: Response, next: NextFunction) {
     }
 
    
-},
+  },
+
+  async updateUser(req: any, res: Response, next: NextFunction) {
+    if (!req.user) {
+        return next(   
+            res.status(404).json({
+                status: false,
+                message: "You are not logged in",
+            })
+        )
+    } else {
+        try{
+            const { userName } = req.body;
+            const user = await User.findOneAndUpdate({userId: req.user.userId},{$set: {userName: userName}},{ upsert: true, omitUndefined: true, new: true } );
+            if (!user) {
+                return next(   
+                    res.status(404).json({
+                        status: false,
+                        message: `user with the ${req.user.userId} does not exist`,
+                    })
+                )
+            }
+            const data = { userName };
+            return res.status(201).json({
+                status: "success",
+                data,
+              });
+        } catch (error) {
+            res.status(500).json({
+              status: false,
+              message: `${error}`,
+            });
+          }
+    }
+  }
 
 };
