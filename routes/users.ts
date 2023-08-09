@@ -26,6 +26,12 @@ router.post(
   })
 );
 
-
+router.get(
+  "/user",
+    protect,
+  asyncHandler((req: Request, res: Response) => {
+    return userController.getUser (req, res);
+  })
+);
 
 module.exports = router;

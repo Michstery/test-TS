@@ -17,4 +17,7 @@ router.post("/login", asyncHandler((req, res) => {
 router.post("/logout", protect, asyncHandler((req, res) => {
     return userController.logoutUser(req, res);
 }));
+router.get("/user", protect, asyncHandler((req, res) => {
+    return userController.getUser(req, res);
+}));
 module.exports = router;

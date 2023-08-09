@@ -103,6 +103,47 @@ module.exports = {
     });
   },
 
+async getUser(req: any, res: Response, next: NextFunction) { 
+    if (req.user.role != 'admin') {
+        return res.status(400).json({
+            status: "false",
+            message: "Only Admins are Authorized to Get Users",
+        });
+    } else{
+        try {
+            const { dateFrom, dateTo, ...rest } = req.query
+            const query = {
+                ...rest,
+            }
+            if (req.query.userId) {
+                let user = await User.findOne({
+                    userId: req.query.userId
+                })
+                if (!user) {
+                    return res.status(404).json({
+                        status: "false",
+                        message: "We are currently unable to get this user details.",
+                    });
+                }
+                user = user.toJSON()
+                return res.status(201).json({
+                    status: "success",
+                    user: user,
+                });
+            }
+            return res.status(201).json({
+                status: "success",
+                responseBody: await User.find(query).sort({ _id: '-1' }),
+            });
+        } catch (error) {
+            res.status(500).json({
+              status: false,
+              message: `${error}`,
+            });
+        }
+    }
 
+   
+},
 
 };
